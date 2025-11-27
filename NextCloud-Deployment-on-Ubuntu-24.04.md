@@ -291,7 +291,7 @@ service nginx restart
 ``` shell
 fdisk /dev/sdb
 ```
-<img width="765" height="475" alt="Image" src="https://github.com/user-attachments/assets/3fbcf7be-a52b-4deb-b47a-571aef1bf2a1" />
+<img width="765" height="475" alt="Image" src="https://github.com/user-attachments/assets/6290afcd-a749-4c9c-bf9f-59998ce3e5ee" />
 
 > Định dạng Filesystem là kiểu xfs.
 
@@ -321,4 +321,4 @@ df -hT
 > Mở trình duyệt lên và truy cập vào *https://nextcloud-url* để thực hiện tiếp các bước thiết lập NextCloud.
 
 
-<img width="1186" height="1080" alt="Image" src="https://github.com/user-attachments/assets/8fd3cc75-d6a5-423f-8dd5-c14a46a63117" />
+<img width="1186" height="1080" alt="Image" src="https://github.com/user-attachments/assets/55120de4-32b9-4e96-a845-2f4b98c760df" />
