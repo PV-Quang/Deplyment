@@ -315,7 +315,7 @@ chown -R www-data:www-data /nextcloud-data/
 df -hT
 ```
 
-<img width="575" height="196" alt="Image" src="https://github.com/user-attachments/assets/a2c913e7-1766-4d33-9ad6-2d9556dfe666" />
+<img width="575" height="196" alt="Image" src="https://github.com/user-attachments/assets/5e1aaafe-e532-45b6-9b1a-ae2cf5a3bda6" />
 
 
 > Mở trình duyệt lên và truy cập vào *https://nextcloud-url* để thực hiện tiếp các bước thiết lập NextCloud.
