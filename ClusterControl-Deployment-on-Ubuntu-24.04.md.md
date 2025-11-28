@@ -1,4 +1,4 @@
-## HƯỚNG DẪN CÀI ĐẶT NEXTCLOUD TRÊN UBUNTU 24.04
+## 1. HƯỚNG DẪN CÀI ĐẶT CLUSTERCONTROL TRÊN UBUNTU 24.04
 
 > Cài đặt Ubuntu Server 24.04 và update hệ thống.
 
@@ -7,304 +7,102 @@ apt update -y
 apt upgrade -y
 ```
 
-### BƯỚC 1: Cài Đặt LEMP Stack.
+> Link hướng dẫn cài đặt từ trang chủ ClutserControl: https://docs.severalnines.com/clustercontrol/latest/getting-started/quickstart/
 
-> __Cài đặt NGINX.__
 
-``` shell
-apt install nginx unzip net-tools -y
-```
-
-> Kích hoạt và khởi động NGINX.
+### BƯỚC 1: Download và chạy script để tiến hành cài đặt ClusterControl.
 
 ``` shell
-systemctl enable nginx
-systemctl start nginx
-systemctl status nginx
+wget https://severalnines.com/downloads/cmon/install-cc  
+chmod +x install-cc  
+sudo ./install-cc 
 ```
+<img width="1321" height="701" alt="Image" src="https://github.com/user-attachments/assets/5b5a95e6-b702-47c4-9998-f2cda4720605" />
 
-> __Cài đặt MariaDB Database Server.__
+### BƯỚC 2: Mở trình duyệt lên và truy cập vào *https://clustercontrol-url* để thực hiện tiếp các bước thiết lập ban đầu cho ClusterControl.
+
+<img width="1300" height="672" alt="Image" src="https://github.com/user-attachments/assets/9281a178-d6ca-40ed-bb10-d96d44d39d7d" />
+
+<img width="1299" height="671" alt="Image" src="https://github.com/user-attachments/assets/50915158-aea6-43ac-984b-b417cbf1f602" />
+
+### BƯỚC 3: Cấu hình SSL Certificate cho WEB UI.
+> cd đến thư mục **_/usr/share/ccmgr_** rồi thay cert và key tương ứng vào file _**server.crt**_ và **_server.key_** sau đó restart service cmon.
 
 ``` shell
-apt install mariadb-server mariadb-client -y
+systemctl restart cmon-* 
 ```
+<img width="1257" height="278" alt="Image" src="https://github.com/user-attachments/assets/41e4c521-c800-41a7-9667-e6b9834e85c6" />
 
-> Khởi động và kích hoạt MariaDB.
+<img width="1438" height="583" alt="Image" src="https://github.com/user-attachments/assets/7718f7f2-d56a-4432-9e4e-4a8409879bd9" />
+
+### BƯỚC 4: Tạo SSH Key.
+> ClusterControl sử dụng ssh key ssh đến các node DB để deploy DB.
 
 ``` shell
-systemctl enable mariadb
-systemctl start mariadb
-systemctl status mariadb
+ssh-keygen -t rsa
 ```
+<img width="1440" height="688" alt="Image" src="https://github.com/user-attachments/assets/10c940dc-663a-4cff-80a2-27fc3d94587a" />
 
-> Cấu hình bảo mật MariaDB.
+> Copy public key đến file **_/root/.ssh/authorized_keys_** các node DB.
 
 ``` shell
-mysql_secure_installation
+ssh-copy-id -i ~/.ssh/id_rsa {target_node_IP_address}
 ```
 
-![image](https://github.com/user-attachments/assets/69f2965c-65d9-474b-ad72-567a88eb627e)
+<img width="1378" height="357" alt="Image" src="https://github.com/user-attachments/assets/16da4b2b-c55d-4b3b-8d38-7a4cc69d832c" />
 
-> __Cài đặt PHP.__
+--------------
+
+## 2. TRIỂN KHAI SQL SERVER DB CLUSTER
+> Cài đặt Ubuntu Server 22.04 và update hệ thống (SQL SERVER chưa hỗ trợ Ubuntu Server 24.04).
 
 ``` shell
-apt install -y php8.3 php8.3-cli php8.3-fpm php8.3-mysql php8.3-curl php8.3-gd php8.3-xml php8.3-mbstring php8.3-bz2 php8.3-intl php8.3-bcmath php8.3-gmp php8.3-zip php8.3-imagick
-apt install -y libmagickcore-6.q16-6-extra
+apt update -y
+apt upgrade -y
 ```
+> Tại giao diện ClusterControl chọn **Clusters** -> **Deploy a cluster**
 
-> Kích hoạt và khởi động PHP cùng hệ thống.
+<img width="1370" height="513" alt="Image" src="https://github.com/user-attachments/assets/8586748a-d829-4d3e-845a-b0124059d3e8" />
 
-``` shell
-systemctl enable php8.3-fpm
-systemctl start php8.3-fpm
-systemctl status php8.3-fpm
-```
+> **Create a database cluster**
 
+<img width="1364" height="832" alt="Image" src="https://github.com/user-attachments/assets/4f5eea27-8dc1-4138-953b-e3a907c942c5" />
 
-### BƯỚC 2: Cài đặt NextCloud.
+> Chọn **SQL SERVER**
 
-> Tạo directory lưu trữ certificate.
+<img width="1363" height="828" alt="Image" src="https://github.com/user-attachments/assets/8d3653db-a907-4ac1-a535-a88c0ff3b8a4" />
 
-``` shell
-mkdir /ssl_cert
-```
+> Nhập tên cho cluster DB
 
-> Tạo file Certificate và Private key. Sau đó copy nội dung Certificate vào 2 file này.
+<img width="1363" height="716" alt="Image" src="https://github.com/user-attachments/assets/c86f05aa-fd30-4172-aa28-b9c8a34b1e78" />
 
-``` shell
-touch /ssl_cert/fullchain.pem
-touch /ssl_cert/privkey.pem
-```
-> Tải source NextCloud từ trang chủ về.
+> Cấu hình SSH đến DB Node
 
-``` shell
-wget https://download.nextcloud.com/server/releases/nextcloud-29.0.16.zip
-```
-> Giải nén file NextCloud vừa tải về.
+<img width="1353" height="800" alt="Image" src="https://github.com/user-attachments/assets/e570cedb-504b-4174-92ce-303651de89d8" />
 
-``` shell
-unzip nextcloud-*.zip -d /usr/share/nginx/
-chown -R www-data:www-data /usr/share/nginx/nextcloud/
-```
+> **Node configuration** (lưu lại  Admin username và password để login DB)
 
-> Tạo Database cho NextCloud.
+<img width="1356" height="860" alt="Image" src="https://github.com/user-attachments/assets/67e8b0d7-dc7d-4799-ba67-97e607f241bb" />
 
-> Tiếp theo, đăng nhập vào mysql bằng lệnh *mysql* và thực hiện tạo database_name và database_user cho Nextcloud.
+> **Add node** (SQL Server chỉ chấp nhận nhập node FQDN  -  đặt file host trong VM nếu không có DNS server) 
 
-``` shell
-create database nextcloud_db;
-create user nextcloud@localhost identified by 'password';
-grant all privileges on nextcloud_db.* to nextcloud@localhost identified by 'password';
-flush privileges;
-exit;
-```
+<img width="1339" height="712" alt="Image" src="https://github.com/user-attachments/assets/4a81c38c-9fdf-44d4-84dd-37ab6d970685" />
 
-> Tạo file cấu hình NGINX NextCloud.
+> Preview lại thông tin và nhấn **Finish** để tiến hành cài đặt
 
-``` shell
-vi /etc/nginx/conf.d/nextcloud.conf
-```
+<img width="1368" height="893" alt="Image" src="https://github.com/user-attachments/assets/434aa9fa-830e-4f89-a607-56c65e8b9e74" />
 
-> Sau đó nhập vào nội dung file cấu hình mẫu bên dưới vào
->
-> Lưu ý: Thay server_name drive-demo.tpcloud.com.vn; bằng tên server_name muốn sử dụng. Và thay ssl_certificate, ssl_certificate_key bằng đường dẫn SSL đã tạo ở BƯỚC 2.
+### Truy cập và sử dụng SQL Server
+> Sử dụng SQL Server Management Studio để login và sử dụng DB
+> Server name: nhập đúng server name của VM DB
+> User Name và Password ở bước **Node configuration**
 
-``` shell
-upstream php-handler {
-    #server 127.0.0.1:9000;
-    server unix:/var/run/php/php8.3-fpm.sock;
-}
+<img width="1314" height="869" alt="Image" src="https://github.com/user-attachments/assets/5958f044-ff06-4177-86c9-904341a7df79" />
 
-server {
-    listen 80;
-    listen [::]:80;
-    server_name drive-demo.tpcloud.com.vn;
-    # enforce https
-    return 301 https://$server_name:443$request_uri;
-}
+> Test Restore DB (File Backup DB phải nằm ở máy Chủ SQL Server)
 
-server {
-    listen 443 ssl http2;
-    listen [::]:443 ssl http2;
-    server_name drive-demo.tpcloud.com.vn;
+<img width="1310" height="700" alt="Image" src="https://github.com/user-attachments/assets/ae057619-171d-4fa9-aa08-95fb27a96fe5" />
 
-    ssl_certificate /ssl_cert/fullchain.pem; 
-    ssl_certificate_key /ssl_cert/privkey.pem;
+<img width="1237" height="852" alt="Image" src="https://github.com/user-attachments/assets/739078d3-2567-4161-9726-0341d196ea5f" />
 
-    # Add headers to serve security related headers
-    # Before enabling Strict-Transport-Security headers please read into this
-    # topic first.
-    #add_header Strict-Transport-Security "max-age=15768000; includeSubDomains; preload;" always;
-    #
-    # WARNING: Only add the preload option once you read about
-    # the consequences in https://hstspreload.org/. This option
-    # will add the domain to a hardcoded list that is shipped
-    # in all major browsers and getting removed from this list
-    # could take several months.
-    add_header Referrer-Policy "no-referrer" always;
-    add_header X-Content-Type-Options "nosniff" always;
-    add_header X-Download-Options "noopen" always;
-    add_header X-Frame-Options "SAMEORIGIN" always;
-    add_header X-Permitted-Cross-Domain-Policies "none" always;
-    add_header X-Robots-Tag "none" always;
-    add_header X-XSS-Protection "1; mode=block" always;
-    add_header Strict-Transport-Security 'max-age=31536000; includeSubDomains; preload';
-
-    # Remove X-Powered-By, which is an information leak
-    fastcgi_hide_header X-Powered-By;
-
-    # Path to the root of your installation
-    root /usr/share/nginx/nextcloud/;
-
-    location = /robots.txt {
-        allow all;
-        log_not_found off;
-        access_log off;
-    }
-
-    # The following 2 rules are only needed for the user_webfinger app.
-    # Uncomment it if you're planning to use this app.
-    #rewrite ^/.well-known/host-meta /public.php?service=host-meta last;
-    #rewrite ^/.well-known/host-meta.json /public.php?service=host-meta-json last;
-
-    # The following rule is only needed for the Social app.
-    # Uncomment it if you're planning to use this app.
-    #rewrite ^/.well-known/webfinger /public.php?service=webfinger last;
-
-    location = /.well-known/carddav {
-      return 301 $scheme://$host:$server_port/remote.php/dav;
-    }
-    location = /.well-known/caldav {
-      return 301 $scheme://$host:$server_port/remote.php/dav;
-    }
-
-    # set max upload size
-    client_max_body_size 512M;
-    fastcgi_buffers 64 4K;
-
-    # Enable gzip but do not remove ETag headers
-    gzip on;
-    gzip_vary on;
-    gzip_comp_level 4;
-    gzip_min_length 256;
-    gzip_proxied expired no-cache no-store private no_last_modified no_etag auth;
-    gzip_types application/atom+xml application/javascript application/json application/ld+json application/manifest+json application/rss+xml application/vnd.geo+json application/vnd.ms-fontobject application/x-font-ttf application/x-web-app-manifest+json application/xhtml+xml application/xml font/opentype image/bmp image/svg+xml image/x-icon text/cache-manifest text/css text/plain text/vcard text/vnd.rim.location.xloc text/vtt text/x-component text/x-cross-domain-policy;
-
-    # Uncomment if your server is build with the ngx_pagespeed module
-    # This module is currently not supported.
-    #pagespeed off;
-
-    location / {
-        rewrite ^ /index.php;
-    }
-
-    location ~ ^\/(?:build|tests|config|lib|3rdparty|templates|data)\/ {
-        deny all;
-    }
-    location ~ ^\/(?:\.|autotest|occ|issue|indie|db_|console) {
-        deny all;
-    }
-
-    location ~ ^\/(?:index|remote|public|cron|core\/ajax\/update|status|ocs\/v[12]|updater\/.+|oc[ms]-provider\/.+)\.php(?:$|\/) {
-        fastcgi_split_path_info ^(.+?\.php)(\/.*|)$;
-        set $path_info $fastcgi_path_info;
-        try_files $fastcgi_script_name =404;
-        include fastcgi_params;
-        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
-        fastcgi_param PATH_INFO $path_info;
-        fastcgi_param HTTPS on;
-        # Avoid sending the security headers twice
-        fastcgi_param modHeadersAvailable true;
-        # Enable pretty urls
-        fastcgi_param front_controller_active true;
-        fastcgi_pass php-handler;
-        fastcgi_intercept_errors on;
-        fastcgi_request_buffering off;
-    }
-
-    location ~ ^\/(?:updater|oc[ms]-provider)(?:$|\/) {
-        try_files $uri/ =404;
-        index index.php;
-    }
-
-    # Adding the cache control header for js, css and map files
-    # Make sure it is BELOW the PHP block
-    location ~ \.(?:css|js|woff2?|svg|gif|map)$ {
-        try_files $uri /index.php$request_uri;
-        add_header Cache-Control "public, max-age=15778463";
-        # Add headers to serve security related headers (It is intended to
-        # have those duplicated to the ones above)
-        # Before enabling Strict-Transport-Security headers please read into
-        # this topic first.
-        #add_header Strict-Transport-Security "max-age=15768000; includeSubDomains; preload;" always;
-        #
-        # WARNING: Only add the preload option once you read about
-        # the consequences in https://hstspreload.org/. This option
-        # will add the domain to a hardcoded list that is shipped
-        # in all major browsers and getting removed from this list
-        # could take several months.
-        add_header Referrer-Policy "no-referrer" always;
-        add_header X-Content-Type-Options "nosniff" always;
-        add_header X-Download-Options "noopen" always;
-        add_header X-Frame-Options "SAMEORIGIN" always;
-        add_header X-Permitted-Cross-Domain-Policies "none" always;
-        add_header X-Robots-Tag "none" always;
-        add_header X-XSS-Protection "1; mode=block" always;
-
-        # Optional: Don't log access to assets
-        access_log off;
-    }
-
-    location ~ \.(?:png|html|ttf|ico|jpg|jpeg|bcmap)$ {
-        try_files $uri /index.php$request_uri;
-        # Optional: Don't log access to other assets
-        access_log off;
-    }
-}
-```
-
-> Tối ưu các tham số sau của PHP: *vi /etc/php/8.3/fpm/php.ini*. Sửa các dòng:
-
-``` shell
-memory_limit = 2048G
-upload_max_filesize = 200G
-post_max_size = 200G
-max_execution_time = 3600
-```
-
-> Sau khi nhập file cấu hình xong, kiểm tra xem có lỗi không bằng lệnh sau:
-
-``` shell
-nginx -t
-```
-
-> Nếu nhận được thông báo *syntax is ok* hãy khởi động lại NGINX.
-
-``` shell
-service nginx restart
-```
-
-### BƯỚC 3: Tạo Datastore chứa dữ liệu.
-
-> Tạo phân vùng cho datastore (/dev/sdb).
-
-``` shell
-fdisk /dev/sdb
-```
-<img width="765" height="475" alt="Image" src="https://github.com/user-attachments/assets/6290afcd-a749-4c9c-bf9f-59998ce3e5ee" />
-
-> Định dạng Filesystem là kiểu xfs.
-
-``` shell
-mkfs -t xfs /dev/sdb1
-```
-
-> Tạo Directory chứa dữ liệu và mount vào LV ở trên.
-
-``` shell
-mkdir -p /nextcloud-data
-echo "/dev/sdb1 /nextcloud-data xfs defaults 0 0" >> /etc/fstab
-systemctl daemon-reload
-mount -a
-chown -R www-data:www-data /nextcloud-data/
-```
+<img width="1287" height="533" alt="Image" src="https://github.com/user-attachments/assets/a43f7c80-6318-460d-8566-c93d451748e0" />
